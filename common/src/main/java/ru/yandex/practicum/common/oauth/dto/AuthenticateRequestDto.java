@@ -1,0 +1,17 @@
+package ru.yandex.practicum.common.oauth.dto;
+
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class AuthenticateRequestDto {
+
+    private String grantType;
+    private String username;
+    private String password;
+    private String clientId;
+    private String clientSecret;
+    private List<String> scopes;
+
+}

@@ -1,0 +1,49 @@
+services:
+  oauth-db:
+    image: postgres:16
+    container_name: postgres
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - TZ=Europe/Moscow
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  oauth-app:
+    build: oauth-server
+    image: oauth-server
+    container_name: shareit-server
+    expose:
+      - "9090"
+    depends_on:
+      - oauth-db
+    environment:
+      - SERVER_PORT=9090
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - SPRING_DATASOURCE_USERNAME=shareit
+      - SPRING_DATASOURCE_PASSWORD=shareit
+      - LOGGING_LEVEL_RU_PRACTICUM=DEBUG
+      - TZ=Europe/Moscow
+
+  rs-app:
+    build: rs-server
+    image: rs-server
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    depends_on:
+      oauth-app:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8080
+      - SHAREIT_SERVER_URL=http://server:9090
+      - TZ=Europe/Moscow
