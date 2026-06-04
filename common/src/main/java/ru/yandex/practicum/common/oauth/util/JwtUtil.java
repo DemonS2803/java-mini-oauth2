@@ -1,7 +1,6 @@
 package ru.yandex.practicum.common.oauth.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -13,31 +12,31 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Slf4j
-class JwtUtil {
+public class JwtUtil {
 
     public static final String ALGORITHM = "HmacSHA256";
 
     public static ObjectMapper mapper = buildMapper();
 
     // 1) Кодирование данных в токен (header.payload.signature)
-    public static String encode(Jwt token, String secret) throws Exception {
+    public static String encode(BaseJwt token, String secret) throws Exception {
         String encodedToken = encodeToken(token);
         String signature = signToken(encodedToken, secret);
 
         return String.format("%s.%s", encodedToken, signature);
     }
 
-    private static String encodeToken(Jwt token) throws JsonProcessingException {
-        return String.format("%s.%s", encodeHeader(token), encodePayload(token));
+    private static String encodeToken(BaseJwt token) throws JsonProcessingException {
+        return String.format("%s.%s", encodeHeader(token.getHeader()), encodePayload(token.getPayload()));
     }
 
-    private static String encodeHeader(Jwt token) throws JsonProcessingException {
-        String json = mapper.writeValueAsString(token.getHeader());
+    private static String encodeHeader(JwtHeader header) throws JsonProcessingException {
+        String json = mapper.writeValueAsString(header);
         return base64UrlEncode(json.getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String encodePayload(Jwt token) throws JsonProcessingException {
-        String json = mapper.writeValueAsString(token.getPayload());
+    private static String encodePayload(JwtPayload payload) throws JsonProcessingException {
+        String json = mapper.writeValueAsString(payload);
         return base64UrlEncode(json.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -47,7 +46,7 @@ class JwtUtil {
      * @return
      * @throws Exception
      */
-    public static Jwt decode(String token) throws Exception {
+    public static AccessJwt decode(String token) throws Exception {
         String[] parts = token.split("\\.");
         if (parts.length < 2) return null;
 
@@ -58,7 +57,7 @@ class JwtUtil {
     }
 
     // 2) Проверка токена и возврат данных, если всё ок, иначе null
-    public static Jwt decodeAndVerify(String token, String secret) throws Exception {
+    public static AccessJwt decodeAccessAndVerify(String token, String secret) throws Exception {
         String[] parts = token.split("\\.");
         if (parts.length != 3) return null;
 
@@ -72,18 +71,54 @@ class JwtUtil {
             return null; // подпись не совпала
         }
 
-        return decodeToken(header, payload);
+        AccessJwt accessJwt = new AccessJwt();
+        accessJwt.setHeader(decodeHeader(header));
+        accessJwt.setPayload(decodeAccessPayload(payload));
+        return accessJwt;
     }
 
-    private static Jwt decodeToken(String header, String payload) throws JsonProcessingException {
-        Jwt token = new Jwt();
+    public static RefreshJwt decodeRefreshAndVerify(String token, String secret) throws Exception {
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) return null;
+
+        String header = parts[0];
+        String payload = parts[1];
+        String signature = parts[2];
+
+        String toSign = header + "." + payload;
+        String expectedSig = signToken(toSign, secret);
+        if (!expectedSig.equals(signature)) {
+            return null; // подпись не совпала
+        }
+
+        RefreshJwt refreshJwt = new RefreshJwt();
+        refreshJwt.setHeader(decodeHeader(header));
+        refreshJwt.setPayload(decodeRefreshPayload(payload));
+        return refreshJwt;
+    }
+
+    private static AccessJwt decodeToken(String header, String payload) throws JsonProcessingException {
+        AccessJwt token = new AccessJwt();
         String decodedHeader = new String(base64UrlDecode(header));
         String decodedPayload = new String(base64UrlDecode(payload));
-//        log.info("decoded header: {}", decodedHeader);
-//        log.info("decoded payload: {}", decodedPayload);
         token.setHeader(mapper.readValue(decodedHeader, JwtHeader.class));
-        token.setPayload(mapper.readValue(decodedPayload, JwtPayload.class));
+        token.setPayload(mapper.readValue(decodedPayload, AccessJwtPayload.class));
         return token;
+    }
+
+    private static JwtHeader decodeHeader(String header) throws JsonProcessingException {
+        String decodedHeader = new String(base64UrlDecode(header));
+        return mapper.readValue(decodedHeader, JwtHeader.class);
+    }
+
+    private static AccessJwtPayload decodeAccessPayload(String payload) throws JsonProcessingException {
+        String decodedPayload = new String(base64UrlDecode(payload));
+        return mapper.readValue(decodedPayload, AccessJwtPayload.class);
+    }
+
+    private static RefreshJwtPayload decodeRefreshPayload(String payload) throws JsonProcessingException {
+        String decodedPayload = new String(base64UrlDecode(payload));
+        return mapper.readValue(decodedPayload, RefreshJwtPayload.class);
     }
 
     // Подпись HS256
@@ -109,7 +144,6 @@ class JwtUtil {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-//        mapper.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
         return mapper;
     }
 

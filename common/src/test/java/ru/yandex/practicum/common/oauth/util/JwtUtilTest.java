@@ -3,7 +3,6 @@ package ru.yandex.practicum.common.oauth.util;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.common.oauth.enums.TokenType;
-import ru.yandex.practicum.common.testutil.TestStubs;
 
 import java.util.List;
 
@@ -17,8 +16,8 @@ public class JwtUtilTest {
     protected static final String SECRET = "super-secret";
 
     @Test
-    void testEncode_shouldSuccessEncode() throws Exception {
-        Jwt token = getJwt();
+    void testEncodeAccess_shouldSuccessEncode() throws Exception {
+        AccessJwt token = getAccessJwt();
         String encodedToken = JwtUtil.encode(token, VALID_CLIENT_SECRET);
 
         log.info(encodedToken);
@@ -27,34 +26,66 @@ public class JwtUtilTest {
     }
 
     @Test
-    void testEncode_shouldSuccessEncodeDecode() throws Exception {
-        Jwt token = getJwt();
+    void testEncodeAccess_shouldSuccessEncodeDecode() throws Exception {
+        AccessJwt token = getAccessJwt();
         String encodedToken = JwtUtil.encode(token, VALID_CLIENT_SECRET);
 
         log.info(encodedToken);
-        Jwt decodedToken = JwtUtil.decodeAndVerify(encodedToken, VALID_CLIENT_SECRET);
+        AccessJwt decodedToken = JwtUtil.decodeAccessAndVerify(encodedToken, VALID_CLIENT_SECRET);
         assertEquals(token.getHeader(), decodedToken.getHeader());
         assertEquals(token.getPayload(), decodedToken.getPayload());
-        assertEquals(token.getHeader().getAlgorithm(), decodedToken.getHeader().getAlgorithm());
+        assertEquals(TokenType.AT, decodedToken.getHeader().getType());
         assertEquals(token.getPayload().getScopes(), decodedToken.getPayload().getScopes());
     }
 
-    private Jwt getJwt() {
-        return Jwt.builder()
-                .header(getValidHeader())
-                .payload(getValidPayload())
+    @Test
+    void testEncodeRefresh_shouldSuccessEncode() throws Exception {
+        RefreshJwt token = getRefreshJwt();
+        String encodedToken = JwtUtil.encode(token, VALID_CLIENT_SECRET);
+
+        log.info(encodedToken);
+        assertNotNull(encodedToken);
+        assertEquals(3, encodedToken.split("\\.").length);
+    }
+
+    @Test
+    void testEncodeRefresh_shouldSuccessEncodeDecode() throws Exception {
+        RefreshJwt token = getRefreshJwt();
+        String encodedToken = JwtUtil.encode(token, VALID_CLIENT_SECRET);
+
+        log.info(encodedToken);
+        RefreshJwt decodedToken = JwtUtil.decodeRefreshAndVerify(encodedToken, VALID_CLIENT_SECRET);
+        assertEquals(token.getHeader(), decodedToken.getHeader());
+        assertEquals(token.getPayload(), decodedToken.getPayload());
+        assertEquals(TokenType.RT, decodedToken.getHeader().getType());
+    }
+
+    private AccessJwt getAccessJwt() {
+        JwtHeader header = getValidHeader();
+        header.setType(TokenType.AT);
+        return AccessJwt.builder()
+                .header(header)
+                .payload(getValidAccessPayload())
+                .build();
+    }
+
+    private RefreshJwt getRefreshJwt() {
+        JwtHeader header = getValidHeader();
+        header.setType(TokenType.RT);
+        return RefreshJwt.builder()
+                .header(header)
+                .payload(getValidRefreshPayload())
                 .build();
     }
 
     private JwtHeader getValidHeader() {
         return JwtHeader.builder()
                 .algorithm(JwtUtil.ALGORITHM)
-                .type(TokenType.AT)
                 .build();
     }
 
-    private JwtPayload getValidPayload() {
-        return JwtPayload.builder()
+    private AccessJwtPayload getValidAccessPayload() {
+        return AccessJwtPayload.builder()
                 .clientId(VALID_CLIENT_ID)
                 .issuer(JWT_TOKEN_ISSUER)
                 .audience(JWT_VALID_AUDIENCE)
@@ -63,6 +94,12 @@ public class JwtUtilTest {
                 .expiredAt(DAY_NEXT)
                 .issuedAt(DAY_AGO)
                 .scopes(List.of(JWT_READ_PAYMENT_SCOPE, JWT_WRITE_PAYMENT_SCOPE))
+                .build();
+    }
+
+    private RefreshJwtPayload getValidRefreshPayload() {
+        return RefreshJwtPayload.builder()
+                .refreshId(VALID_CLIENT_ID)
                 .build();
     }
 }
