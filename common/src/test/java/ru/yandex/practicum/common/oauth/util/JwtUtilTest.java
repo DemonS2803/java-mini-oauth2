@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.common.oauth.enums.TokenType;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.practicum.common.testutil.TestStubs.*;
@@ -99,7 +101,7 @@ public class JwtUtilTest {
 
     private RefreshJwtPayload getValidRefreshPayload() {
         return RefreshJwtPayload.builder()
-                .refreshId(VALID_CLIENT_ID)
+                .refreshId(UUID.randomUUID())
                 .build();
     }
 }

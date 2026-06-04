@@ -1,6 +1,11 @@
 package ru.yandex.practicum.common.testutil;
 
 import ru.yandex.practicum.common.oauth.dto.AuthenticateRequestDto;
+import ru.yandex.practicum.common.oauth.enums.TokenType;
+import ru.yandex.practicum.common.oauth.util.AccessJwt;
+import ru.yandex.practicum.common.oauth.util.AccessJwtPayload;
+import ru.yandex.practicum.common.oauth.util.JwtHeader;
+import ru.yandex.practicum.common.oauth.util.JwtPayload;
 
 import java.time.LocalDateTime;
 import java.util.List;
