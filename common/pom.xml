@@ -18,4 +18,21 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.8.1</version>-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash; Include test classes in the compile phase &ndash;&gt;-->
+<!--                    <compileSourceRoots>-->
+<!--                        <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>-->
+<!--                        <compileSourceRoot>${project.basedir}/src/test/java</compileSourceRoot>-->
+<!--                    </compileSourceRoots>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
+
 </project>

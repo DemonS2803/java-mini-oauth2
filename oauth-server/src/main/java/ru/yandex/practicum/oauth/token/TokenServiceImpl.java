@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.common.exception.JwtDecodeException;
 import ru.yandex.practicum.common.exception.JwtEncodeException;
+import ru.yandex.practicum.common.exception.RefreshTokenInvalidException;
 import ru.yandex.practicum.common.oauth.dto.*;
 import ru.yandex.practicum.common.oauth.enums.TokenType;
 import ru.yandex.practicum.common.oauth.util.*;
@@ -36,42 +37,33 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public AuthenticateResponseDto authenticate(AuthenticatePasswordRequestDto request) {
         log.info("Authenticating request with password flow: {}", request);
-        try {
-            RefreshToken refreshToken = TokenMapper.toRefreshToken(request);
-            refreshToken.setExpiredAt(LocalDateTime.now().plusDays(refreshTtlDays));
-            refreshToken = refreshIndexRepository.save(refreshToken);
-            log.info("Saved refresh token entity: {}", refreshToken);
+        RefreshToken refreshToken = TokenMapper.toRefreshToken(request);
+        refreshToken.setExpiredAt(LocalDateTime.now().plusDays(refreshTtlDays));
+        refreshToken = refreshIndexRepository.save(refreshToken);
+        log.info("Saved refresh token entity: {}", refreshToken.getId());
 
-            AccessJwt accessJwt = buildAccessJwt(request);
-            String encodedAccessToken = JwtUtil.encode(accessJwt, oauthApiSecret);;
-            log.info("Issued access token: {}", encodedAccessToken);
+        AccessJwt accessJwt = buildAccessJwt(request);
+        String encodedAccessToken = JwtUtil.encode(accessJwt, oauthApiSecret);;
+        log.info("Issued access token: {}", obfuscate(encodedAccessToken));
 
-            RefreshJwt refreshJwt = buildRefreshJwt(request);
-            refreshJwt.getPayload().setRefreshId(refreshToken.getId().toString());
-            String encodedRefreshToken = JwtUtil.encode(refreshJwt, oauthApiSecret);;
-            log.info("Issued refresh token: {}", encodedRefreshToken);
+        RefreshJwt refreshJwt = buildRefreshJwt(request);
+        refreshJwt.getPayload().setRefreshId(refreshToken.getId());
+        String encodedRefreshToken = JwtUtil.encode(refreshJwt, oauthApiSecret);;
+        log.info("Issued refresh token: {}", obfuscate(encodedRefreshToken));
 
-            return buildResponse(encodedAccessToken, encodedRefreshToken);
-        } catch (Exception e) {
-            log.error("Error while issue access token", e);
-            throw new JwtEncodeException("Failed to issue token: " + e.getMessage());
-        }
+        return buildResponse(encodedAccessToken, encodedRefreshToken);
     }
 
     @Override
     public AuthenticateResponseDto authenticate(AuthenticateClientCredentialsRequestDto request) {
         log.info("Authenticating request with client_credentials flow: {}", request);
-        try {
-            AccessJwt accessJwt = buildAccessJwt(request);
-            String encodedAccessToken = JwtUtil.encode(accessJwt, request.getClientSecret());;
-            log.info("Issued access token: {}", encodedAccessToken);
 
-            // not pass refresh for client credentials flow
-            return buildResponse(encodedAccessToken, null);
-        } catch (Exception e) {
-            log.error("Error while issue access token", e);
-            throw new JwtEncodeException("Failed to issue token: " + e.getMessage());
-        }
+        AccessJwt accessJwt = buildAccessJwt(request);
+        String encodedAccessToken = JwtUtil.encode(accessJwt, request.getClientSecret());;
+        log.info("Issued access token: {}", encodedAccessToken);
+
+        // not pass refresh for client credentials flow
+        return buildResponse(encodedAccessToken, null);
     }
 
     protected AuthenticateResponseDto buildResponse(String accessToken, String refreshToken) {
@@ -113,9 +105,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     private RefreshJwt buildRefreshJwt(AuthenticateRequest request) {
-        LocalDateTime now = LocalDateTime.now();
         RefreshJwtPayload payload = RefreshJwtPayload.builder()
-//                .refreshId()
                 .build();
         return RefreshJwt.builder()
                 .header(buildJwtHeader(TokenType.RT))
@@ -132,47 +122,99 @@ public class TokenServiceImpl implements TokenService {
 
 
     @Override
-    public AuthenticateRequestDto refresh(AuthenticateRequestDto request) {
-        return null;
+    public AuthenticateResponseDto refresh(String token) {
+        log.info("Refresh token {}", obfuscate(token));
+        RefreshJwt jwt = JwtUtil.decodeRefreshAndVerify(token, oauthApiSecret);
+
+        RefreshToken refreshToken = refreshIndexRepository.findRefreshTokenById(jwt.getPayload().getRefreshId()).get();
+
+        if (!checkRefreshToken(refreshToken, jwt)) {
+            throw new RefreshTokenInvalidException(
+                    "Refresh token " + refreshToken.getId() + " is not active. Cannot issue new token");
+        }
+
+        AuthenticatePasswordRequestDto request = TokenMapper.toAuthRequest(refreshToken);
+        request.setRoles(refreshToken.getUser().getRoles());
+        log.info("Requesting new authenticate pair for request");
+        refreshToken.setRotated(true);
+        refreshIndexRepository.save(refreshToken);
+        return authenticate(request);
     }
 
     @Override
-    public void revoke(String token) {
+    public void revokeAccessToken(String token) {
+        log.info("Revoking access token: {}", obfuscate(token));
+        AccessJwt jwt = JwtUtil.decodeAccessAndVerify(token, oauthApiSecret);
+        Revocation revocation = new Revocation();
+        revocation.setRevokedAt(LocalDateTime.now());
+        revocation.setId(new TypeTokenId(jwt.getPayload().getTokenId(), TokenType.AT));
+        revocationRepository.save(revocation);
+        log.info("Saved new revocation entity for AT with id {}", jwt.getPayload().getTokenId());
+    }
 
+    @Override
+    public void revokeRefreshToken(String token) {
+        log.info("Revoking refresh token: {}", obfuscate(token));
+
+        RefreshJwt jwt = JwtUtil.decodeRefreshAndVerify(token, oauthApiSecret);
+        Revocation revocation = new Revocation();
+        revocation.setRevokedAt(LocalDateTime.now());
+        revocation.setId(new TypeTokenId(jwt.getPayload().getRefreshId(), TokenType.RT));
+        revocationRepository.save(revocation);
+        log.info("Saved new revocation entity for RT with id {}", jwt.getPayload().getRefreshId());
     }
 
     @Override
     public TokenInfoResponseDto getAccessTokenInfo(String token) {
-        log.info("Fetch access token info: {}", token.substring(0, 15));
-        try {
-            AccessJwt jwt = JwtUtil.decode(token);
-            TokenInfoResponseDto tokenInfo = TokenMapper.toTokenInfoResponse(jwt);
-            if (revocationRepository.existsById(new TypeTokenId(jwt.getPayload().getTokenId(), TokenType.AT))) {
-                log.warn("User fetched info about revoked token {}", token.substring(0, 15));
-                tokenInfo.setActive(false);
-            }
-            return tokenInfo;
-        } catch (Exception e) {
-            throw new JwtDecodeException("Failed to decode JWT: " + e.getMessage());
+        log.info("Fetch access token info: {}", obfuscate(token));
+        AccessJwt jwt = JwtUtil.decode(token);
+        TokenInfoResponseDto tokenInfo = TokenMapper.toTokenInfoResponse(jwt);
+
+        if (LocalDateTime.now().isBefore(tokenInfo.getExpiredAt())) {
+            log.debug("Token {} is still active", obfuscate(token));
+            tokenInfo.setActive(true);
         }
+
+        if (revocationRepository.existsById(new TypeTokenId(jwt.getPayload().getTokenId(), TokenType.AT))) {
+            log.warn("User fetched info about revoked token {}", obfuscate(token));
+            tokenInfo.setActive(false);
+        }
+        return tokenInfo;
     }
 
     @Override
     public TokenInfoResponseDto getRefreshTokenInfo(String token) {
-        log.info("Fetch refresh token info: {}", token.substring(0, 15));
-        try {
-            RefreshJwt jwt = JwtUtil.decodeRefreshAndVerify(token, oauthApiSecret);
-            RefreshToken refreshToken = refreshIndexRepository.getReferenceById(jwt.getPayload().getRefreshId());
-            TokenInfoResponseDto tokenInfo = new TokenInfoResponseDto();
-            tokenInfo.setClientId(refreshToken.getClient().getClientId());
-            if (revocationRepository.existsById(new TypeTokenId(jwt.getPayload().getRefreshId(), TokenType.AT))) {
-                log.warn("User fetched info about revoked token {}", token.substring(0, 15));
-                tokenInfo.setActive(false);
-            }
-            return tokenInfo;
-        } catch (Exception e){
-            throw new JwtDecodeException("Failed to decode JWT: " + e.getMessage());
+        log.info("Fetch refresh token info: {}", obfuscate(token));
+        RefreshJwt jwt = JwtUtil.decodeRefreshAndVerify(token, oauthApiSecret);
+        RefreshToken refreshToken = refreshIndexRepository.getReferenceById(jwt.getPayload().getRefreshId());
+        TokenInfoResponseDto tokenInfo = new TokenInfoResponseDto();
+        tokenInfo.setClientId(refreshToken.getClient().getClientId());
+        tokenInfo.setExpiredAt(refreshToken.getExpiredAt());
+        tokenInfo.setActive(checkRefreshToken(refreshToken, jwt));
+
+        return tokenInfo;
+    }
+
+    private String obfuscate(String token) {
+        return token.substring(0, 15);
+    }
+
+    private boolean checkRefreshToken(RefreshToken refreshToken, RefreshJwt jwt) {
+        if (LocalDateTime.now().isAfter(refreshToken.getExpiredAt())) {
+            log.warn("Refresh token {} is not more active", refreshToken.getId());
+            return false;
         }
+
+        if (refreshToken.isRotated()) {
+            log.warn("Refresh token {} was rotated", refreshToken.getId());
+            return false;
+        }
+
+        if (revocationRepository.existsById(new TypeTokenId(jwt.getPayload().getRefreshId(), TokenType.RT))) {
+            log.warn("User fetched info about revoked token {}", refreshToken.getId());
+            return false;
+        }
+        return true;
     }
 
 }

@@ -10,13 +10,11 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.yandex.practicum.common.exception.InvalidCredentialsException;
 import ru.yandex.practicum.common.exception.NotFoundException;
 import ru.yandex.practicum.oauth.AuthApp;
 import ru.yandex.practicum.oauth.common.PasswordUtil;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
@@ -62,10 +60,7 @@ public class ClientServiceTest {
     void checkClientSecret_shouldThrowInvalidPassword() {
         Client user = getValidClient();
         user = clientRepository.save(user);
-
-        assertThrows(InvalidCredentialsException.class, () -> {
-            clientService.checkClientSecret(VALID_CLIENT_ID, "foo");
-        });
+        assertFalse(clientService.checkClientSecret(VALID_CLIENT_ID, "foo"));
     }
 
     private Client getValidClient() {

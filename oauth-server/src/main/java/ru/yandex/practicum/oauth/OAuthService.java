@@ -1,15 +1,12 @@
 package ru.yandex.practicum.oauth;
 
-import ru.yandex.practicum.common.oauth.dto.AuthenticateRequestDto;
-import ru.yandex.practicum.common.oauth.dto.AuthenticateResponseDto;
-import ru.yandex.practicum.common.oauth.dto.TokenFetchRequestDto;
-import ru.yandex.practicum.common.oauth.dto.TokenInfoResponseDto;
+import ru.yandex.practicum.common.oauth.dto.*;
 
 public interface OAuthService {
 
     AuthenticateResponseDto authenticate(AuthenticateRequestDto request);
 
-    AuthenticateRequestDto refresh();
+    AuthenticateResponseDto refresh(RefreshTokenRequestDto request);
 
     void revoke(TokenFetchRequestDto request);
 

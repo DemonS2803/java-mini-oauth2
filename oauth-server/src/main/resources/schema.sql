@@ -7,7 +7,8 @@ drop type if exists token_type;
 create table if not exists users (
     username varchar(255) primary key,
     password_hash varchar(255) not null,
-    info text
+    info text,
+    roles text
 );
 
 create table if not exists clients (
@@ -21,7 +22,8 @@ create table if not exists refresh_index (
     username varchar(255) references users(username),
     client_id varchar(255) references clients(client_id),
     exp timestamp,
-    rotated boolean default false
+    rotated boolean default false,
+    scopes text
 );
 
 create type token_type as enum ('AT', 'RT');

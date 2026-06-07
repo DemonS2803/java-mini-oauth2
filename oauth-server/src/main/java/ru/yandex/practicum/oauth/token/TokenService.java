@@ -10,9 +10,11 @@ public interface TokenService {
 
     AuthenticateResponseDto authenticate(AuthenticateClientCredentialsRequestDto request);
 
-    AuthenticateRequestDto refresh(AuthenticateRequestDto request);
+    AuthenticateResponseDto refresh(String token);
 
-    void revoke(String token);
+    void revokeAccessToken(String token);
+
+    void revokeRefreshToken(String token);
 
     TokenInfoResponseDto getAccessTokenInfo(String token);
 

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class TokenInfoResponseDto {
 
-    private Boolean active;
+    private boolean active;
     @JsonProperty(value = "client_id")
     private String clientId;
     @JsonProperty(value = "exp")

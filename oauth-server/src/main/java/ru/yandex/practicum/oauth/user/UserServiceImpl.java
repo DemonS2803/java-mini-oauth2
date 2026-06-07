@@ -3,7 +3,6 @@ package ru.yandex.practicum.oauth.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.common.exception.InvalidCredentialsException;
 import ru.yandex.practicum.common.exception.NotFoundException;
 import ru.yandex.practicum.oauth.common.PasswordUtil;
 
@@ -20,16 +19,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean checkUserPassword(String username, String password) {
-        Optional<User> user = userRepository.findUserByUsername(username);
-        if (user.isEmpty()) {
-            throw new NotFoundException("User " + username + " not found");
-        }
+        User user = getUserByUsernameOrThrow(username);
 
-        log.info("DB user passwd hash {}", user.get().getPasswordHash());
-        if (!passwordUtil.checkPassword(password, user.get().getPasswordHash())) {
-            throw new InvalidCredentialsException("User " + username + " entered invalid credentials");
-        }
+//        if (!passwordUtil.checkPassword(password, user.get().getPasswordHash())) {
+//            throw new InvalidCredentialsException("User " + username + " entered invalid credentials");
+//        }
         // bool ret type is just a marker that always is OK
-        return true;
+        return passwordUtil.checkPassword(password, user.getPasswordHash());
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return getUserByUsernameOrThrow(username);
+    }
+
+    private User getUserByUsernameOrThrow(String username) {
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User " + username + " not found"));
     }
 }

@@ -14,14 +14,6 @@ import java.time.LocalDateTime;
 
 public class TokenMapper {
 
-    public static AuthenticatePasswordRequestDto toPasswordRequestDto(AuthenticateRequestDto request) {
-        return null;
-    }
-
-    public static AuthenticateClientCredentialsRequestDto toClientCredentialsRequestDto(AuthenticateRequestDto request) {
-        return null;
-    }
-
     public static RefreshToken toRefreshToken(AuthenticatePasswordRequestDto request) {
         RefreshToken token = new RefreshToken();
         token.setClient(request.getClient());
@@ -36,6 +28,15 @@ public class TokenMapper {
         tokenInfo.setClientId(jwt.getPayload().getClientId());
         tokenInfo.setExpiredAt(jwt.getPayload().getExpiredAt());
         return tokenInfo;
+    }
+
+    public static AuthenticatePasswordRequestDto toAuthRequest(RefreshToken refresh) {
+        AuthenticatePasswordRequestDto authRequest = new AuthenticatePasswordRequestDto();
+        authRequest.setClientId(refresh.getClient().getClientId());
+        authRequest.setClientSecret(refresh.getClient().getSecretHash());
+        authRequest.setScopes(refresh.getScopes());
+        authRequest.setClient(refresh.getClient());
+        return authRequest;
     }
 
 }

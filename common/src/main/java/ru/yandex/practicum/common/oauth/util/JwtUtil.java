@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.common.exception.JWTSignInvalidException;
+import ru.yandex.practicum.common.exception.JwtDecodeException;
+import ru.yandex.practicum.common.exception.JwtEncodeException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,11 +22,15 @@ public class JwtUtil {
     public static ObjectMapper mapper = buildMapper();
 
     // 1) Кодирование данных в токен (header.payload.signature)
-    public static String encode(BaseJwt token, String secret) throws Exception {
-        String encodedToken = encodeToken(token);
-        String signature = signToken(encodedToken, secret);
+    public static String encode(BaseJwt token, String secret) {
+        try {
+            String encodedToken = encodeToken(token);
+            String signature = signToken(encodedToken, secret);
 
-        return String.format("%s.%s", encodedToken, signature);
+            return String.format("%s.%s", encodedToken, signature);
+        } catch (Exception e) {
+            throw new JwtEncodeException("Failed to encode JWT");
+        }
     }
 
     private static String encodeToken(BaseJwt token) throws JsonProcessingException {
@@ -46,55 +53,72 @@ public class JwtUtil {
      * @return
      * @throws Exception
      */
-    public static AccessJwt decode(String token) throws Exception {
-        String[] parts = token.split("\\.");
-        if (parts.length < 2) return null;
+    public static AccessJwt decode(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) return null;
 
-        String header = parts[0];
-        String payload = parts[1];
+            String header = parts[0];
+            String payload = parts[1];
 
-        return decodeToken(header, payload);
+            return decodeToken(header, payload);
+        } catch (Exception e) {
+            log.error("Error while decoding refresh JWT: {}", e.getMessage());
+            throw new JwtDecodeException("Failed to decode refresh JWT");
+        }
     }
 
     // 2) Проверка токена и возврат данных, если всё ок, иначе null
-    public static AccessJwt decodeAccessAndVerify(String token, String secret) throws Exception {
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) return null;
+    public static AccessJwt decodeAccessAndVerify(String token, String secret) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return null;
 
-        String header = parts[0];
-        String payload = parts[1];
-        String signature = parts[2];
+            String header = parts[0];
+            String payload = parts[1];
+            String signature = parts[2];
 
-        String toSign = header + "." + payload;
-        String expectedSig = signToken(toSign, secret);
-        if (!expectedSig.equals(signature)) {
-            return null; // подпись не совпала
+            String toSign = header + "." + payload;
+            String expectedSig = signToken(toSign, secret);
+            if (!expectedSig.equals(signature)) {
+                return null; // подпись не совпала
+            }
+
+            AccessJwt accessJwt = new AccessJwt();
+            accessJwt.setHeader(decodeHeader(header));
+            accessJwt.setPayload(decodeAccessPayload(payload));
+            return accessJwt;
+        } catch (Exception e) {
+            log.error("Error while decoding refresh JWT: {}", e.getMessage());
+            throw new JwtDecodeException("Failed to decode refresh JWT");
         }
-
-        AccessJwt accessJwt = new AccessJwt();
-        accessJwt.setHeader(decodeHeader(header));
-        accessJwt.setPayload(decodeAccessPayload(payload));
-        return accessJwt;
     }
 
-    public static RefreshJwt decodeRefreshAndVerify(String token, String secret) throws Exception {
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) return null;
+    public static RefreshJwt decodeRefreshAndVerify(String token, String secret) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return null;
 
-        String header = parts[0];
-        String payload = parts[1];
-        String signature = parts[2];
+            String header = parts[0];
+            String payload = parts[1];
+            String signature = parts[2];
 
-        String toSign = header + "." + payload;
-        String expectedSig = signToken(toSign, secret);
-        if (!expectedSig.equals(signature)) {
-            return null; // подпись не совпала
+            String toSign = header + "." + payload;
+            String expectedSig = signToken(toSign, secret);
+            if (!expectedSig.equals(signature)) {
+                throw new JWTSignInvalidException(); // подпись не совпала
+            }
+
+            RefreshJwt refreshJwt = new RefreshJwt();
+            refreshJwt.setHeader(decodeHeader(header));
+            refreshJwt.setPayload(decodeRefreshPayload(payload));
+            return refreshJwt;
+        } catch (JWTSignInvalidException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Error while decoding refresh JWT: {}", e.getMessage());
+            throw new JwtDecodeException("Failed to decode refresh JWT");
         }
-
-        RefreshJwt refreshJwt = new RefreshJwt();
-        refreshJwt.setHeader(decodeHeader(header));
-        refreshJwt.setPayload(decodeRefreshPayload(payload));
-        return refreshJwt;
     }
 
     private static AccessJwt decodeToken(String header, String payload) throws JsonProcessingException {

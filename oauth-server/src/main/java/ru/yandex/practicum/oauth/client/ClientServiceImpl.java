@@ -2,7 +2,6 @@ package ru.yandex.practicum.oauth.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.common.exception.InvalidCredentialsException;
 import ru.yandex.practicum.common.exception.NotFoundException;
 import ru.yandex.practicum.oauth.common.PasswordUtil;
 
@@ -18,16 +17,22 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public boolean checkClientSecret(String clientId, String secret) {
-        Optional<Client> client = clientRepository.findClientByClientId(clientId);
-        if (client.isEmpty()) {
-            throw new NotFoundException("Client " + clientId + " not found");
-        }
+        Client client = getClientByIdOrThrow(clientId);
 
-        String hash = passwordUtil.hashPassword(secret);
-        if (!passwordUtil.checkPassword(secret, client.get().getSecretHash())) {
-            throw new InvalidCredentialsException("Client " + clientId + " invalid credentials");
-        }
-        return true;
+//        if (!passwordUtil.checkPassword(secret, client.getSecretHash())) {
+//            throw new InvalidCredentialsException("Client " + clientId + " invalid credentials");
+//        }
+        return passwordUtil.checkPassword(secret, client.getSecretHash());
+    }
+
+    @Override
+    public Client getClientById(String clientId) {
+        return getClientByIdOrThrow(clientId);
+    }
+
+    private Client getClientByIdOrThrow(String clientId) {
+        return clientRepository.findClientByClientId(clientId)
+                .orElseThrow(() -> new NotFoundException("Client " + clientId + " not found"));
     }
 
 }

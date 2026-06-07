@@ -2,12 +2,14 @@ package ru.yandex.practicum.oauth.token;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import ru.yandex.practicum.common.oauth.enums.TokenType;
 
 import java.util.UUID;
 
 @Embeddable
 @AllArgsConstructor
+@NoArgsConstructor
 public class TypeTokenId {
 
     private UUID tokenId;
