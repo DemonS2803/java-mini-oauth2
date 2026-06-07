@@ -10,8 +10,10 @@ public class SimpleRBAC {
     public static final String VIEWER_ROLE = "viewer";
     public static final String EDITOR_ROLE = "editor";
 
-    public static final String READ_SCOPE = ":read";
-    public static final String EDIT_SCOPE = ":edit";
+    public static final String READ_SCOPE = "read";
+    public static final String EDIT_SCOPE = "edit";
+
+    public static final String SEPARATOR = ":";
 
     public static boolean isValidPermissions(List<String> roles, List<String> scopes) {
         Set<String> rolesSet = new HashSet<>(roles);
@@ -29,8 +31,8 @@ public class SimpleRBAC {
      *  payment:read -> viewer
      */
     private static String mapScopeRole(String scope) {
-        int idx = scope.indexOf(":");
-        scope = scope.substring(idx);
+        int idx = scope.indexOf(SEPARATOR);
+        scope = scope.substring(idx + 1);
         return switch (scope) {
             case READ_SCOPE -> VIEWER_ROLE;
             case EDIT_SCOPE -> EDITOR_ROLE;

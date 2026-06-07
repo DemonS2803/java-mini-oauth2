@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.yandex.practicum.common.oauth.util.AccessJwt;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.common.web.HttpConstants;
 import java.io.IOException;
 
 @Slf4j
+@Order(100)
 @Component
 @RequiredArgsConstructor
 public class OAuthRequestFilter extends OncePerRequestFilter {
@@ -31,12 +33,28 @@ public class OAuthRequestFilter extends OncePerRequestFilter {
         }
 
         AccessJwt jwt = securityFilterUtil.getAccessTokenFromRequest(request);
+        if (jwt == null || jwt.getPayload() == null) {
+            log.error("Error during decoding JWT");
+            response.sendError(400, "Failed to decode JWT");
+            return;
+        }
 
+        if (!securityFilterUtil.validateAccessToken(jwt)) {
+            log.info("Token is not active");
+            redirectToOAuthLogin(response);
+            return;
+        }
+
+        request.setAttribute(HttpConstants.JWT_ATTRIBUTE, jwt);
+        log.info("Token is valid");
+        filterChain.doFilter(request, response);
 
     }
 
     private void redirectToOAuthLogin(HttpServletResponse response) throws IOException {
         response.sendRedirect(HttpConstants.OAUTH_BASE_PATH + HttpConstants.OAUTH_TOKEN_PATH);
     }
+
+
 
 }

@@ -1,10 +1,16 @@
 package ru.yandex.practicum.common.testutil;
 
 import ru.yandex.practicum.common.oauth.dto.AuthenticateRequestDto;
+import ru.yandex.practicum.common.oauth.enums.TokenType;
 import ru.yandex.practicum.common.oauth.permissions.SimpleRBAC;
+import ru.yandex.practicum.common.oauth.util.AccessJwt;
+import ru.yandex.practicum.common.oauth.util.AccessJwtPayload;
+import ru.yandex.practicum.common.oauth.util.JwtHeader;
+import ru.yandex.practicum.common.oauth.util.JwtUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public class TestStubs {
 
@@ -34,8 +40,8 @@ public class TestStubs {
     public static final String JWT_VALID_ACCESS_JTI = "jti";
     public static final String JWT_VALID_AUDIENCE = "aud1";
     public static final String JWT_VALID_SUB = "sub1";
-    public static final String JWT_READ_PAYMENT_SCOPE = "payment" + SimpleRBAC.READ_SCOPE;
-    public static final String JWT_WRITE_PAYMENT_SCOPE = "payment" + SimpleRBAC.EDIT_SCOPE;
+    public static final String JWT_READ_PAYMENT_SCOPE = "payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE;
+    public static final String JWT_WRITE_PAYMENT_SCOPE = "payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE;
     public static final List<String> JWT_PAYMENT_SCOPES = List.of(JWT_READ_PAYMENT_SCOPE, JWT_WRITE_PAYMENT_SCOPE);
     public static final List<String> JWT_ROLES = List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE);
 
@@ -58,6 +64,29 @@ public class TestStubs {
                 .scopes(JWT_PAYMENT_SCOPES)
                 .clientId(VALID_CLIENT_ID)
                 .clientSecret(VALID_CLIENT_SECRET)
+                .build();
+    }
+
+    public static AccessJwt getAccessJwt() {
+        LocalDateTime now = LocalDateTime.now();
+        AccessJwtPayload payload = AccessJwtPayload.builder()
+                .issuer(VALID_CLIENT_ID)
+                .roles(JWT_ROLES)
+                .scopes(JWT_PAYMENT_SCOPES)
+                .clientId(VALID_CLIENT_ID)
+                .sub(VALID_CLIENT_ID)
+                .audience(VALID_CLIENT_ID)
+                .expiredAt(now.plusSeconds(6000))
+                .tokenId(UUID.randomUUID())
+                .issuedAt(now)
+                .build();
+        JwtHeader header = JwtHeader.builder()
+                .algorithm(JwtUtil.ALGORITHM)
+                .type(TokenType.AT)
+                .build();
+        return AccessJwt.builder()
+                .header(header)
+                .payload(payload)
                 .build();
     }
 

@@ -29,23 +29,23 @@ public class SimpleRBACTest {
     public static Stream<Arguments> testRBACValidator_shouldPass() {
         return Stream.of(
                 Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of()),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.READ_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE, "payments" + SimpleRBAC.EDIT_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.READ_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.EDIT_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.EDIT_SCOPE, "shop" + SimpleRBAC.EDIT_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.EDIT_SCOPE, "shop" + SimpleRBAC.EDIT_SCOPE))
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE, "shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE, "shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE))
         );
     }
 
     public static Stream<Arguments> testRBACValidator_shouldFail() {
         return Stream.of(
                 Arguments.of(List.of(), List.of("payments" + SimpleRBAC.READ_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("payments" + SimpleRBAC.EDIT_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("shop" + SimpleRBAC.EDIT_SCOPE)),
-                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE, "payments:approve")),
-                Arguments.of(List.of(SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.READ_SCOPE))
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE), List.of("shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE)),
+                Arguments.of(List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "payments:approve")),
+                Arguments.of(List.of(SimpleRBAC.EDITOR_ROLE), List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "shop" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE))
         );
     }
 
