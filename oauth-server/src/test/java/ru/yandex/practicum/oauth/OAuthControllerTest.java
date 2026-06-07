@@ -1,8 +1,17 @@
 package ru.yandex.practicum.oauth;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+
 import jakarta.transaction.Transactional;
+
+import ru.yandex.practicum.common.oauth.dto.*;
+import ru.yandex.practicum.common.web.HttpConstants;
+import ru.yandex.practicum.oauth.client.Client;
+import ru.yandex.practicum.oauth.client.ClientRepository;
+import ru.yandex.practicum.oauth.user.User;
+import ru.yandex.practicum.oauth.user.UserRepository;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,14 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import ru.yandex.practicum.common.oauth.dto.*;
-import ru.yandex.practicum.common.web.HttpConstants;
-import ru.yandex.practicum.oauth.client.Client;
-import ru.yandex.practicum.oauth.client.ClientRepository;
-import ru.yandex.practicum.oauth.user.User;
-import ru.yandex.practicum.oauth.user.UserRepository;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

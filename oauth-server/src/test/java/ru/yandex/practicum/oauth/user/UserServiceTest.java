@@ -1,6 +1,11 @@
 package ru.yandex.practicum.oauth.user;
 
 import jakarta.transaction.Transactional;
+
+import ru.yandex.practicum.common.exception.NotFoundException;
+import ru.yandex.practicum.oauth.AuthApp;
+import ru.yandex.practicum.oauth.common.PasswordUtil;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +15,6 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.yandex.practicum.common.exception.NotFoundException;
-import ru.yandex.practicum.oauth.AuthApp;
-import ru.yandex.practicum.oauth.common.PasswordUtil;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,11 +38,6 @@ public class UserServiceTest {
     public static final String VALID_PASSWORD = "password";
     public static final String VALID_USER_INFO = "info";
 
-
-    @BeforeEach
-    void setup() {
-
-    }
 
     @Test
     void checkUserPassword_shouldSuccess() {

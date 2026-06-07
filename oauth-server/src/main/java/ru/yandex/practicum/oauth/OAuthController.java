@@ -1,11 +1,12 @@
 package ru.yandex.practicum.oauth;
 
+import ru.yandex.practicum.common.oauth.dto.*;
+import ru.yandex.practicum.common.web.HttpConstants;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.common.oauth.dto.*;
-import ru.yandex.practicum.common.web.HttpConstants;
 
 @Slf4j
 @RestController

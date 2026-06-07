@@ -1,8 +1,7 @@
 package ru.yandex.practicum.oauth;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import java.util.List;
+
 import ru.yandex.practicum.common.exception.*;
 import ru.yandex.practicum.common.oauth.dto.*;
 import ru.yandex.practicum.common.oauth.permissions.SimpleRBAC;
@@ -14,7 +13,9 @@ import ru.yandex.practicum.oauth.token.dto.AuthenticatePasswordRequestDto;
 import ru.yandex.practicum.oauth.user.User;
 import ru.yandex.practicum.oauth.user.UserService;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service

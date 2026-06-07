@@ -1,11 +1,13 @@
 package ru.yandex.practicum.oauth.token;
 
+import java.util.UUID;
+
 import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 import ru.yandex.practicum.common.oauth.enums.TokenType;
 
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Embeddable
 @AllArgsConstructor

@@ -1,12 +1,13 @@
 package ru.yandex.practicum.oauth;
 
+import ru.yandex.practicum.common.exception.*;
+import ru.yandex.practicum.common.oauth.dto.ErrorResponseDto;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.common.exception.*;
-import ru.yandex.practicum.common.oauth.dto.ErrorResponseDto;
 
 @Slf4j
 @RestControllerAdvice

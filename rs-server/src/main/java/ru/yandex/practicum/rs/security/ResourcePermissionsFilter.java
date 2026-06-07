@@ -1,20 +1,22 @@
 package ru.yandex.practicum.rs.security;
 
+import java.io.IOException;
+import java.util.List;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import ru.yandex.practicum.common.oauth.permissions.SimpleRBAC;
+import ru.yandex.practicum.common.oauth.util.AccessJwt;
+import ru.yandex.practicum.common.web.HttpConstants;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.yandex.practicum.common.oauth.permissions.SimpleRBAC;
-import ru.yandex.practicum.common.oauth.util.AccessJwt;
-import ru.yandex.practicum.common.web.HttpConstants;
-
-import java.io.IOException;
-import java.util.List;
 
 @Slf4j
 @Order(200)

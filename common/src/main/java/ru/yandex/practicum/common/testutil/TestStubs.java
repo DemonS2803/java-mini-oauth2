@@ -24,9 +24,6 @@ public class TestStubs {
     public static final LocalDateTime MONTH_NEXT = NOW.plusMonths(1);
 
 
-    // User
-
-
     // Client
     public static final String VALID_CLIENT_ID = "test client";
     public static final String VALID_CLIENT_SECRET = "test secret";
@@ -37,7 +34,6 @@ public class TestStubs {
 
     // JWT
     public static final String JWT_TOKEN_ISSUER = "oauth-server";
-    public static final String JWT_VALID_ACCESS_JTI = "jti";
     public static final String JWT_VALID_AUDIENCE = "aud1";
     public static final String JWT_VALID_SUB = "sub1";
     public static final String JWT_READ_PAYMENT_SCOPE = "payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE;

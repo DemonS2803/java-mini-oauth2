@@ -1,17 +1,18 @@
 package ru.yandex.practicum.oauth.token;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import ru.yandex.practicum.common.dao.converter.SpaceSeparatedListConverter;
+import ru.yandex.practicum.oauth.client.Client;
+import ru.yandex.practicum.oauth.user.User;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.yandex.practicum.common.dao.converter.SpaceSeparatedListConverter;
-import ru.yandex.practicum.oauth.client.Client;
-import ru.yandex.practicum.oauth.user.User;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "refresh_index")

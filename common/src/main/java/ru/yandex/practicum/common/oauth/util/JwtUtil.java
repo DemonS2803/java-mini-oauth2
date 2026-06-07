@@ -1,18 +1,19 @@
 package ru.yandex.practicum.common.oauth.util;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+import ru.yandex.practicum.common.exception.JWTSignInvalidException;
+import ru.yandex.practicum.common.exception.JwtDecodeException;
+import ru.yandex.practicum.common.exception.JwtEncodeException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.common.exception.JWTSignInvalidException;
-import ru.yandex.practicum.common.exception.JwtDecodeException;
-import ru.yandex.practicum.common.exception.JwtEncodeException;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 @Slf4j
 public class JwtUtil {
@@ -21,7 +22,9 @@ public class JwtUtil {
 
     public static ObjectMapper mapper = buildMapper();
 
-    // 1) Кодирование данных в токен (header.payload.signature)
+    /**
+     * header.payload.signature
+     */
     public static String encode(BaseJwt token, String secret) {
         try {
             String encodedToken = encodeToken(token);
@@ -56,7 +59,9 @@ public class JwtUtil {
     public static AccessJwt decode(String token) {
         try {
             String[] parts = token.split("\\.");
-            if (parts.length < 2) return null;
+            if (parts.length < 2) {
+                return null;
+            }
 
             String header = parts[0];
             String payload = parts[1];
@@ -68,11 +73,12 @@ public class JwtUtil {
         }
     }
 
-    // 2) Проверка токена и возврат данных, если всё ок, иначе null
     public static AccessJwt decodeAccessAndVerify(String token, String secret) {
         try {
             String[] parts = token.split("\\.");
-            if (parts.length != 3) return null;
+            if (parts.length != 3) {
+                return null;
+            }
 
             String header = parts[0];
             String payload = parts[1];
@@ -81,7 +87,7 @@ public class JwtUtil {
             String toSign = header + "." + payload;
             String expectedSig = signToken(toSign, secret);
             if (!expectedSig.equals(signature)) {
-                return null; // подпись не совпала
+                return null;
             }
 
             AccessJwt accessJwt = new AccessJwt();
@@ -97,7 +103,9 @@ public class JwtUtil {
     public static RefreshJwt decodeRefreshAndVerify(String token, String secret) {
         try {
             String[] parts = token.split("\\.");
-            if (parts.length != 3) return null;
+            if (parts.length != 3) {
+                return null;
+            }
 
             String header = parts[0];
             String payload = parts[1];
@@ -106,7 +114,7 @@ public class JwtUtil {
             String toSign = header + "." + payload;
             String expectedSig = signToken(toSign, secret);
             if (!expectedSig.equals(signature)) {
-                throw new JWTSignInvalidException(); // подпись не совпала
+                throw new JWTSignInvalidException();
             }
 
             RefreshJwt refreshJwt = new RefreshJwt();
@@ -145,7 +153,6 @@ public class JwtUtil {
         return mapper.readValue(decodedPayload, RefreshJwtPayload.class);
     }
 
-    // Подпись HS256
     private static String signToken(String data, String secret) throws Exception {
         Mac mac = Mac.getInstance(ALGORITHM);
         SecretKeySpec key =
@@ -155,7 +162,6 @@ public class JwtUtil {
         return base64UrlEncode(rawHmac);
     }
 
-    // Base64URL encode (без =, +, /)
     private static String base64UrlEncode(byte[] bytes) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }

@@ -2,12 +2,13 @@ package ru.yandex.practicum.oauth.token.dto;
 
 import java.util.List;
 
+import ru.yandex.practicum.common.oauth.dto.AuthenticateRequest;
+import ru.yandex.practicum.oauth.client.Client;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.common.oauth.dto.AuthenticateRequest;
-import ru.yandex.practicum.oauth.client.Client;
 
 @Data
 @Builder

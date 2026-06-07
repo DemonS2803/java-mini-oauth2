@@ -1,7 +1,13 @@
 package ru.yandex.practicum.rs.resource;
 
+import java.util.List;
 
 import jakarta.transaction.Transactional;
+
+import ru.yandex.practicum.common.oauth.util.AccessJwt;
+import ru.yandex.practicum.common.oauth.util.JwtUtil;
+import ru.yandex.practicum.common.web.HttpConstants;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,15 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import ru.yandex.practicum.common.oauth.dto.RefreshTokenRequestDto;
-import ru.yandex.practicum.common.oauth.enums.TokenType;
-import ru.yandex.practicum.common.oauth.util.AccessJwt;
-import ru.yandex.practicum.common.oauth.util.JwtHeader;
-import ru.yandex.practicum.common.oauth.util.JwtUtil;
-import ru.yandex.practicum.common.web.HttpConstants;
 import ru.yandex.practicum.rs.ResourceApp;
-
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

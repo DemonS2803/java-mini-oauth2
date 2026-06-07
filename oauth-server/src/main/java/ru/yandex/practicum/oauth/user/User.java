@@ -1,10 +1,12 @@
 package ru.yandex.practicum.oauth.user;
 
+import java.util.List;
+
 import jakarta.persistence.*;
-import lombok.*;
+
 import ru.yandex.practicum.common.dao.converter.SpaceSeparatedListConverter;
 
-import java.util.List;
+import lombok.*;
 
 @Entity
 @Table(name = "users")

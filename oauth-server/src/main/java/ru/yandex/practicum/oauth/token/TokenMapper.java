@@ -1,16 +1,10 @@
 package ru.yandex.practicum.oauth.token;
 
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.common.oauth.dto.AuthenticateRequestDto;
-import ru.yandex.practicum.common.oauth.dto.RefreshTokenRequestDto;
+import java.time.LocalDateTime;
+
 import ru.yandex.practicum.common.oauth.dto.TokenInfoResponseDto;
 import ru.yandex.practicum.common.oauth.util.AccessJwt;
-import ru.yandex.practicum.common.oauth.util.RefreshJwt;
-import ru.yandex.practicum.oauth.token.dto.AuthenticateClientCredentialsRequestDto;
 import ru.yandex.practicum.oauth.token.dto.AuthenticatePasswordRequestDto;
-
-import java.sql.Ref;
-import java.time.LocalDateTime;
 
 public class TokenMapper {
 

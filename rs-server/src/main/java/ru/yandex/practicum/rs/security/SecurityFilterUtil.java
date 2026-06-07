@@ -1,16 +1,16 @@
 package ru.yandex.practicum.rs.security;
 
+import java.time.LocalDateTime;
+
 import jakarta.servlet.http.HttpServletRequest;
+
+import ru.yandex.practicum.common.oauth.util.AccessJwt;
+import ru.yandex.practicum.common.oauth.util.JwtUtil;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.common.exception.AuthenticateException;
-import ru.yandex.practicum.common.exception.JwtDecodeException;
-import ru.yandex.practicum.common.oauth.util.AccessJwt;
-import ru.yandex.practicum.common.oauth.util.JwtUtil;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component

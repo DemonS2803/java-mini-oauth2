@@ -1,12 +1,8 @@
 package ru.yandex.practicum.oauth.token;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.JDBCException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.common.exception.JwtDecodeException;
-import ru.yandex.practicum.common.exception.JwtEncodeException;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import ru.yandex.practicum.common.exception.RefreshTokenInvalidException;
 import ru.yandex.practicum.common.oauth.dto.*;
 import ru.yandex.practicum.common.oauth.enums.TokenType;
@@ -14,8 +10,10 @@ import ru.yandex.practicum.common.oauth.util.*;
 import ru.yandex.practicum.oauth.token.dto.AuthenticateClientCredentialsRequestDto;
 import ru.yandex.practicum.oauth.token.dto.AuthenticatePasswordRequestDto;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service

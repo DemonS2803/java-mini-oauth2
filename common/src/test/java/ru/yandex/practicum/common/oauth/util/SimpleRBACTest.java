@@ -59,10 +59,10 @@ public class SimpleRBACTest {
     public static Stream<Arguments> testRBAC_minimalRolesList() {
         return Stream.of(
                 Arguments.of(List.of(), List.of()),
-                Arguments.of(List.of("payments" + SimpleRBAC.READ_SCOPE), List.of(SimpleRBAC.VIEWER_ROLE)),
-                Arguments.of(List.of("payments" + SimpleRBAC.EDIT_SCOPE), List.of(SimpleRBAC.EDITOR_ROLE)),
-                Arguments.of(List.of("payments" + SimpleRBAC.READ_SCOPE, "payments" + SimpleRBAC.READ_SCOPE), List.of(SimpleRBAC.VIEWER_ROLE)),
-                Arguments.of(List.of("payments" + SimpleRBAC.READ_SCOPE, "payments" + SimpleRBAC.EDIT_SCOPE), List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE))
+                Arguments.of(List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE), List.of(SimpleRBAC.VIEWER_ROLE)),
+                Arguments.of(List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE), List.of(SimpleRBAC.EDITOR_ROLE)),
+                Arguments.of(List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE), List.of(SimpleRBAC.VIEWER_ROLE)),
+                Arguments.of(List.of("payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.READ_SCOPE, "payments" + SimpleRBAC.SEPARATOR + SimpleRBAC.EDIT_SCOPE), List.of(SimpleRBAC.VIEWER_ROLE, SimpleRBAC.EDITOR_ROLE))
         );
     }
 

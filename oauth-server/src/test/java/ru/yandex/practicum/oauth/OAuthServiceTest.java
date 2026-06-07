@@ -1,6 +1,15 @@
 package ru.yandex.practicum.oauth;
 
 import jakarta.transaction.Transactional;
+
+import ru.yandex.practicum.common.exception.UnknownAuthenticationGrantTypeException;
+import ru.yandex.practicum.common.exception.UnknownTokenTypeHintException;
+import ru.yandex.practicum.common.oauth.dto.*;
+import ru.yandex.practicum.oauth.client.Client;
+import ru.yandex.practicum.oauth.client.ClientRepository;
+import ru.yandex.practicum.oauth.user.User;
+import ru.yandex.practicum.oauth.user.UserRepository;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,18 +19,6 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.yandex.practicum.common.exception.UnknownAuthenticationGrantTypeException;
-import ru.yandex.practicum.common.exception.UnknownTokenTypeHintException;
-import ru.yandex.practicum.common.oauth.dto.*;
-import ru.yandex.practicum.oauth.client.Client;
-import ru.yandex.practicum.oauth.client.ClientRepository;
-import ru.yandex.practicum.oauth.client.ClientService;
-import ru.yandex.practicum.oauth.common.PasswordUtil;
-import ru.yandex.practicum.oauth.token.TokenService;
-import ru.yandex.practicum.oauth.token.dto.AuthenticateClientCredentialsRequestDto;
-import ru.yandex.practicum.oauth.user.User;
-import ru.yandex.practicum.oauth.user.UserRepository;
-import ru.yandex.practicum.oauth.user.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.yandex.practicum.common.testutil.TestStubs.*;
@@ -41,8 +38,6 @@ public class OAuthServiceTest {
     private ClientRepository clientRepository;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private PasswordUtil passwordUtil;
 
     private Client client;
     private User user;

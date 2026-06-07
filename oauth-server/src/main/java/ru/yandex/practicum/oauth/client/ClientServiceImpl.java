@@ -1,11 +1,10 @@
 package ru.yandex.practicum.oauth.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ru.yandex.practicum.common.exception.NotFoundException;
 import ru.yandex.practicum.oauth.common.PasswordUtil;
 
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -18,10 +17,6 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public boolean checkClientSecret(String clientId, String secret) {
         Client client = getClientByIdOrThrow(clientId);
-
-//        if (!passwordUtil.checkPassword(secret, client.getSecretHash())) {
-//            throw new InvalidCredentialsException("Client " + clientId + " invalid credentials");
-//        }
         return passwordUtil.checkPassword(secret, client.getSecretHash());
     }
 
