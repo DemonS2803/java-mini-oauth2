@@ -20,22 +20,25 @@ services:
   oauth-app:
     build: oauth-server
     image: oauth-server
-    container_name: shareit-server
+    container_name: oauth-app
     expose:
       - "9090"
+    ports:
+      - "9090:9090"
     depends_on:
       - oauth-db
     environment:
       - SERVER_PORT=9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
-      - SPRING_DATASOURCE_USERNAME=shareit
-      - SPRING_DATASOURCE_PASSWORD=shareit
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://oauth-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - LOGGING_LEVEL_RU_PRACTICUM=DEBUG
       - TZ=Europe/Moscow
 
   rs-app:
     build: rs-server
     image: rs-server
+    container_name: rs-app
     expose:
       - "8080"
     ports:
@@ -45,5 +48,5 @@ services:
         condition: service_started
     environment:
       - SERVER_PORT=8080
-      - SHAREIT_SERVER_URL=http://server:9090
+      - OAUTH_SERVER_ADDRESS=http://localhost:9090
       - TZ=Europe/Moscow
