@@ -26,10 +26,8 @@ create table if not exists refresh_index (
     scopes text
 );
 
-create type token_type as enum ('AT', 'RT');
-
 create table if not exists revocation (
-    type token_type not null ,
+    type varchar(2) not null ,
     token_id uuid not null,
     revoked_at timestamp default current_timestamp,
     primary key (type, token_id)

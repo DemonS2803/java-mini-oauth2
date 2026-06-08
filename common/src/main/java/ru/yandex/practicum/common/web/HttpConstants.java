@@ -8,6 +8,8 @@ public class HttpConstants {
     public static final String OAUTH_REFRESH_PATH = "/token/refresh";
     public static final String OAUTH_REVOKE_PATH = "/revoke";
     public static final String OAUTH_INTROSPECT_PATH = "/introspect";
+    // Emulate login page
+    public static final String OAUTH_LOGIN_PATH = "/login";
 
     // Public API paths
     public static final String API_BASE_PATH = "/api";

@@ -12,6 +12,7 @@ public class TokenMapper {
         RefreshToken token = new RefreshToken();
         token.setClient(request.getClient());
         token.setUser(request.getUser());
+        token.setScopes(request.getScopes());
         return token;
     }
 

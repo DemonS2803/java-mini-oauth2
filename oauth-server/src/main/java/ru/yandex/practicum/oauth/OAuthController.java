@@ -36,4 +36,9 @@ public class OAuthController {
         return oAuthService.tokenInfo(tokenInfoRequest);
     }
 
+    @GetMapping(HttpConstants.OAUTH_LOGIN_PATH)
+    public ResponseEntity<?> login() {
+        return ResponseEntity.ok().body("Hello World! (redirected)");
+    }
+
 }

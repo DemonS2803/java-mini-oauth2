@@ -1,0 +1,477 @@
+{
+  "info": {
+    "_postman_id": "d900595b-7a53-4a5a-b35b-6973146a1215",
+    "name": "mini-oauth2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24511152"
+  },
+  "item": [
+    {
+      "name": "Issue token by password",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"clientId\": {{client_id}},\n    \"clientSecret\": {{client_secret}},\n    \"username\": {{user_id}},\n    \"password\": {{password}},\n    \"grantType\": \"password\",\n    \"scopes\": {{payment_scopes}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/token",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Issue token by cc",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse the response body as JSON",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Check if access_token exists in the response",
+              "pm.test(\"Access token exists in the response\", function () {",
+              "    pm.expect(responseJson).to.have.property('access_token');",
+              "});",
+              "",
+              "// Set the access_token to the collection environment",
+              "if (responseJson.access_token) {",
+              "    pm.collectionVariables.set(\"access_token\", responseJson.access_token);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"client_id\": {{client_id}},\n    \"client_secret\": {{client_secret}},\n    \"grant_type\": \"client_credentials\",\n    \"scopes\": {{payment_scopes}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/token",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Issue token for reader",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// Parse the response body as JSON",
+              "const responseJson = pm.response.json();",
+              "",
+              "// Check if access_token exists in the response",
+              "pm.test(\"Access token exists in the response\", function () {",
+              "    pm.expect(responseJson).to.have.property('access_token');",
+              "});",
+              "pm.test(\"Refresh token exists in the response\", function () {",
+              "    pm.expect(responseJson).to.have.property('refresh_token');",
+              "});",
+              "",
+              "// Set the access_token to the collection environment",
+              "if (responseJson.refresh_token) {",
+              "    pm.collectionVariables.set(\"refresh_token\", responseJson.refresh_token);",
+              "}",
+              "",
+              "if (responseJson.access_token) {",
+              "    pm.collectionVariables.set(\"access_token\", responseJson.access_token);",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"client_id\": {{client_id}},\n    \"client_secret\": {{client_secret}},\n    \"grant_type\": \"password\",\n    \"username\": {{user_reader}},\n    \"password\": {{password}},\n    \"scopes\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/token",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "token"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Refresh token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"client_id\": {{client_id}},\n    \"client_secret\": {{client_secret}},\n    \"grant_type\": \"refresh_token\",\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/token/refresh",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "token",
+            "refresh"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Introspect access token",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"token_type_hint\": \"access_token\",\n    \"token\": \"{{access_token}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/introspect",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "introspect"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Introspect refresh token",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"token_type_hint\": \"refresh_token\",\n    \"token\": \"{{refresh_token}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/introspect",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "introspect"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Revoke access token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"token_type_hint\": \"access_token\",\n    \"token\": \"{{access_token}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/revoke",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "revoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Revoke refresh token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"token_type_hint\": \"refresh_token\",\n    \"token\": \"{{refresh_token}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://{{oauth-fqdn}}/oauth/revoke",
+          "protocol": "http",
+          "host": [
+            "{{oauth-fqdn}}"
+          ],
+          "path": [
+            "oauth",
+            "revoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Redirect unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{rs-fqdn}}/api/payments",
+          "protocol": "http",
+          "host": [
+            "{{rs-fqdn}}"
+          ],
+          "path": [
+            "api",
+            "payments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get resource",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://{{rs-fqdn}}/api/payments",
+          "protocol": "http",
+          "host": [
+            "{{rs-fqdn}}"
+          ],
+          "path": [
+            "api",
+            "payments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Edit resource",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://{{rs-fqdn}}/api/payments",
+          "protocol": "http",
+          "host": [
+            "{{rs-fqdn}}"
+          ],
+          "path": [
+            "api",
+            "payments"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "client_id",
+      "value": ""
+    },
+    {
+      "key": "client_secret",
+      "value": ""
+    },
+    {
+      "key": "rs-fqdn",
+      "value": ""
+    },
+    {
+      "key": "oauth-fqdn",
+      "value": ""
+    },
+    {
+      "key": "payment_scopes",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "user_reader",
+      "value": ""
+    }
+  ]
+}

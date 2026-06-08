@@ -12,6 +12,7 @@ import ru.yandex.practicum.common.web.HttpConstants;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,6 +24,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class OAuthRequestFilter extends OncePerRequestFilter {
 
     private final SecurityFilterUtil securityFilterUtil;
+
+    @Value("${oauth.server.address}")
+    private String oAuthServerAddress;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -54,7 +58,9 @@ public class OAuthRequestFilter extends OncePerRequestFilter {
     }
 
     private void redirectToOAuthLogin(HttpServletResponse response) throws IOException {
-        response.sendRedirect(HttpConstants.OAUTH_BASE_PATH + HttpConstants.OAUTH_TOKEN_PATH);
+        String redirectUrl = oAuthServerAddress + HttpConstants.OAUTH_BASE_PATH + HttpConstants.OAUTH_LOGIN_PATH;
+        log.info("Redirecting to {}", redirectUrl);
+        response.sendRedirect(redirectUrl);
     }
 
 
