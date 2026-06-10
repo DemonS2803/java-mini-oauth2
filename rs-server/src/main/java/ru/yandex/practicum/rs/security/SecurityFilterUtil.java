@@ -54,11 +54,7 @@ class SecurityFilterUtil {
             return false;
         }
 
-        if (!isTokenAudValid(jwt)) {
-            return false;
-        }
-
-        return true;
+        return isTokenAudValid(jwt);
     }
 
     private boolean isTokenExpired(AccessJwt jwt) {

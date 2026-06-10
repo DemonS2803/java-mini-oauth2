@@ -3,6 +3,7 @@ package ru.yandex.practicum.oauth.token;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import ru.yandex.practicum.common.exception.NotFoundException;
 import ru.yandex.practicum.common.exception.RefreshTokenInvalidException;
 import ru.yandex.practicum.common.oauth.dto.*;
 import ru.yandex.practicum.common.oauth.enums.TokenType;
@@ -44,8 +45,7 @@ public class TokenServiceImpl implements TokenService {
         String encodedAccessToken = JwtUtil.encode(accessJwt, oauthApiSecret);;
         log.info("Issued access token: {}", obfuscate(encodedAccessToken));
 
-        RefreshJwt refreshJwt = buildRefreshJwt(request);
-        refreshJwt.getPayload().setRefreshId(refreshToken.getId());
+        RefreshJwt refreshJwt = buildRefreshJwt(refreshToken.getId());
         String encodedRefreshToken = JwtUtil.encode(refreshJwt, oauthApiSecret);;
         log.info("Issued refresh token: {}", obfuscate(encodedRefreshToken));
 
@@ -102,8 +102,9 @@ public class TokenServiceImpl implements TokenService {
                 .build();
     }
 
-    private RefreshJwt buildRefreshJwt(AuthenticateRequest request) {
+    private RefreshJwt buildRefreshJwt(UUID refreshId) {
         RefreshJwtPayload payload = RefreshJwtPayload.builder()
+                .refreshId(refreshId)
                 .build();
         return RefreshJwt.builder()
                 .header(buildJwtHeader(TokenType.RT))
@@ -124,7 +125,9 @@ public class TokenServiceImpl implements TokenService {
         log.info("Refresh token {}", obfuscate(token));
         RefreshJwt jwt = JwtUtil.decodeRefreshAndVerify(token, oauthApiSecret);
 
-        RefreshToken refreshToken = refreshIndexRepository.findRefreshTokenById(jwt.getPayload().getRefreshId()).get();
+        UUID refreshId = jwt.getPayload().getRefreshId();
+        RefreshToken refreshToken = refreshIndexRepository.findRefreshTokenById(refreshId)
+                .orElseThrow(() -> new NotFoundException("Refresh token with id " + refreshId + " not found"));
 
         if (!checkRefreshToken(refreshToken, jwt)) {
             throw new RefreshTokenInvalidException(
@@ -165,7 +168,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public TokenInfoResponseDto getAccessTokenInfo(String token) {
         log.info("Fetch access token info: {}", obfuscate(token));
-        AccessJwt jwt = JwtUtil.decode(token);
+        AccessJwt jwt = JwtUtil.decodeAccessAndVerify(token, oauthApiSecret);
         TokenInfoResponseDto tokenInfo = TokenMapper.toTokenInfoResponse(jwt);
 
         if (LocalDateTime.now().isBefore(tokenInfo.getExpiredAt())) {

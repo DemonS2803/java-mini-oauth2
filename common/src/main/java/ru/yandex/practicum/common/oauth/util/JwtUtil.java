@@ -4,6 +4,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 
 import ru.yandex.practicum.common.exception.JWTSignInvalidException;
 import ru.yandex.practicum.common.exception.JwtDecodeException;
@@ -50,34 +51,11 @@ public class JwtUtil {
         return base64UrlEncode(json.getBytes(StandardCharsets.UTF_8));
     }
 
-    /**
-     * Simply decode JWT to object without any checks
-     * @param token - string with at least 2 dot-separated parts
-     * @return
-     * @throws Exception
-     */
-    public static AccessJwt decode(String token) {
-        try {
-            String[] parts = token.split("\\.");
-            if (parts.length < 2) {
-                return null;
-            }
-
-            String header = parts[0];
-            String payload = parts[1];
-
-            return decodeToken(header, payload);
-        } catch (Exception e) {
-            log.error("Error while decoding refresh JWT: {}", e.getMessage());
-            throw new JwtDecodeException("Failed to decode refresh JWT");
-        }
-    }
-
     public static AccessJwt decodeAccessAndVerify(String token, String secret) {
         try {
             String[] parts = token.split("\\.");
             if (parts.length != 3) {
-                return null;
+                throw new JwtDecodeException("Access JWT is invalid");
             }
 
             String header = parts[0];
@@ -87,7 +65,7 @@ public class JwtUtil {
             String toSign = header + "." + payload;
             String expectedSig = signToken(toSign, secret);
             if (!expectedSig.equals(signature)) {
-                return null;
+                throw new JWTSignInvalidException();
             }
 
             AccessJwt accessJwt = new AccessJwt();
@@ -104,7 +82,7 @@ public class JwtUtil {
         try {
             String[] parts = token.split("\\.");
             if (parts.length != 3) {
-                return null;
+                throw new JwtDecodeException("Refresh JWT is invalid");
             }
 
             String header = parts[0];
@@ -129,28 +107,22 @@ public class JwtUtil {
         }
     }
 
-    private static AccessJwt decodeToken(String header, String payload) throws JsonProcessingException {
-        AccessJwt token = new AccessJwt();
-        String decodedHeader = new String(base64UrlDecode(header));
-        String decodedPayload = new String(base64UrlDecode(payload));
-        token.setHeader(mapper.readValue(decodedHeader, JwtHeader.class));
-        token.setPayload(mapper.readValue(decodedPayload, AccessJwtPayload.class));
-        return token;
-    }
-
     private static JwtHeader decodeHeader(String header) throws JsonProcessingException {
         String decodedHeader = new String(base64UrlDecode(header));
-        return mapper.readValue(decodedHeader, JwtHeader.class);
+        return Optional.ofNullable(mapper.readValue(decodedHeader, JwtHeader.class))
+                .orElse(new JwtHeader());
     }
 
     private static AccessJwtPayload decodeAccessPayload(String payload) throws JsonProcessingException {
         String decodedPayload = new String(base64UrlDecode(payload));
-        return mapper.readValue(decodedPayload, AccessJwtPayload.class);
+        return Optional.ofNullable(mapper.readValue(decodedPayload, AccessJwtPayload.class))
+                .orElse(new AccessJwtPayload());
     }
 
     private static RefreshJwtPayload decodeRefreshPayload(String payload) throws JsonProcessingException {
         String decodedPayload = new String(base64UrlDecode(payload));
-        return mapper.readValue(decodedPayload, RefreshJwtPayload.class);
+        return Optional.ofNullable(mapper.readValue(decodedPayload, RefreshJwtPayload.class))
+                .orElse(new RefreshJwtPayload());
     }
 
     private static String signToken(String data, String secret) throws Exception {
